@@ -1,47 +1,527 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>ScrollTrigger: SVG Text Mask(gsap)</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
-<link rel="stylesheet" href="./css/timeline.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>未来账本</title>
+<meta name="description" content="把全世界预言家留下的、有明确日期的预言记在一条时间线上；到期的逐条审计，未到期的挂账待验。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* ---------- tokens: dark-first (night sky / almanac); light = daylight paper ---------- */
+:root{
+  --bg:#0A0E1A; --surface:#121829; --surface-2:#1A2238; --line:#263050; --line-2:#33406A;
+  --ink:#ECE8DC; --ink-2:#A9AFC2; --ink-3:#7A8199;
+  --accent:#E6B85C; --accent-ink:#0A0E1A;
+  --hit:#4FC98F; --partial:#E8A93A; --miss:#E5645A; --pending:#7C9CFF; --unf:#9AA0B4;
+  --shadow:0 12px 36px rgba(0,0,0,.45);
+  --serif:"Noto Serif SC","Songti SC","SimSun",serif;
+  --sans:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono","SFMono-Regular",Menlo,Consolas,monospace;
+  --railw:96px; --colw:236px; --n:1;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F5F7FB; --line:#D5DAE6; --line-2:#BFC7DA;
+    --ink:#141A2E; --ink-2:#4C5470; --ink-3:#7D849B;
+    --accent:#9A6B12; --accent-ink:#FFFFFF;
+    --hit:#1E8E5C; --partial:#A07800; --miss:#C8283F; --pending:#3F63D6; --unf:#6B7186;
+    --shadow:0 12px 36px rgba(20,26,46,.14);
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F5F7FB; --line:#D5DAE6; --line-2:#BFC7DA;
+  --ink:#141A2E; --ink-2:#4C5470; --ink-3:#7D849B;
+  --accent:#9A6B12; --accent-ink:#FFFFFF;
+  --hit:#1E8E5C; --partial:#A07800; --miss:#C8283F; --pending:#3F63D6; --unf:#6B7186;
+  --shadow:0 12px 36px rgba(20,26,46,.14);
+  color-scheme:light;
+}
 
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto} }
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ---------- masthead ---------- */
+.mast{position:relative;overflow:hidden;border-bottom:1px solid var(--line)}
+.mast canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.mast .wrap{position:relative;padding-top:28px;padding-bottom:28px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.wordmark{font-family:var(--mono);font-weight:600;letter-spacing:.02em;color:var(--ink-2);text-decoration:none;font-size:14px}
+.wordmark b{color:var(--accent);font-weight:600}
+.themebtn{border:1px solid var(--line-2);background:var(--surface);border-radius:999px;padding:4px 12px;font-family:var(--mono);font-size:12px;cursor:pointer;color:var(--ink-2)}
+.themebtn:hover{color:var(--ink);border-color:var(--accent)}
+h1{font-family:var(--serif);font-weight:900;font-size:clamp(34px,5.2vw,56px);line-height:1.15;margin:26px 0 10px;letter-spacing:.02em;text-wrap:balance}
+h1 small{display:block;font-family:var(--mono);font-weight:500;font-size:13px;color:var(--ink-3);letter-spacing:.14em;text-transform:uppercase;margin-bottom:12px}
+.thesis{max-width:62ch;color:var(--ink-2);margin:0 0 22px;font-size:16px}
+.thesis em{font-style:normal;color:var(--ink);border-bottom:1px solid var(--accent)}
+.score{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.score>div{background:var(--surface);padding:12px 14px 10px;display:flex;flex-direction:column;gap:2px}
+.score .k{font-size:12px;color:var(--ink-3);letter-spacing:.08em;display:flex;align-items:center;gap:6px}
+.score .v{font-family:var(--mono);font-size:26px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.score .v.hit{color:var(--hit)} .score .v.partial{color:var(--partial)} .score .v.miss{color:var(--miss)} .score .v.pending{color:var(--pending)}
+.score .sub{font-size:11.5px;color:var(--ink-3)}
+@media (max-width:760px){ .score{grid-template-columns:repeat(2,1fr)} .score>div:first-child{grid-column:1/-1} }
+
+/* ---------- controls ---------- */
+.controls{border-bottom:1px solid var(--line);background:var(--bg)}
+.controls .wrap{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;padding-top:12px;padding-bottom:12px}
+.group{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.group .lbl{font-family:var(--mono);font-size:11px;color:var(--ink-3);letter-spacing:.1em;margin-right:2px}
+.chip{border:1px solid var(--line-2);background:transparent;border-radius:999px;padding:3px 11px;font-size:12.5px;cursor:pointer;color:var(--ink-2);line-height:1.5}
+.chip:hover{color:var(--ink);border-color:var(--ink-3)}
+.chip[aria-pressed="true"]{background:var(--surface-2);color:var(--ink);border-color:var(--accent)}
+.chip .g{font-family:var(--mono);font-weight:600;margin-right:4px}
+.chip.hit .g{color:var(--hit)} .chip.partial .g{color:var(--partial)} .chip.miss .g{color:var(--miss)} .chip.pending .g{color:var(--pending)} .chip.unf .g{color:var(--unf)}
+.search{border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:5px 10px;font-size:13px;color:var(--ink);min-width:200px}
+.search::placeholder{color:var(--ink-3)}
+select.sel{border:1px solid var(--line-2);background:var(--surface);border-radius:6px;padding:5px 8px;font-size:12.5px;color:var(--ink)}
+.toggle{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-2);cursor:pointer;user-select:none}
+.toggle input{accent-color:var(--accent)}
+.count{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--ink-3)}
+
+/* ---------- board (swimlanes) ---------- */
+.boardwrap{position:relative}
+.headstrip{position:sticky;top:0;z-index:6;overflow:hidden;background:var(--bg);border-bottom:1px solid var(--line-2);box-shadow:0 6px 18px -12px rgba(0,0,0,.6)}
+.grid{display:grid;grid-template-columns:var(--railw) repeat(var(--n),var(--colw));width:max-content;min-width:100%}
+.corner{position:sticky;left:0;z-index:3;background:var(--bg);border-right:1px solid var(--line-2);padding:10px 10px 8px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px}
+.corner .lbl{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.12em}
+.nav{display:flex;gap:4px}
+.nav button{width:26px;height:24px;border:1px solid var(--line-2);background:var(--surface);border-radius:4px;cursor:pointer;color:var(--ink-2);font-family:var(--mono);font-size:12px;line-height:1;padding:0}
+.nav button:hover{color:var(--ink);border-color:var(--accent)}
+.ph{padding:10px 12px 8px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-height:96px;justify-content:flex-end}
+.ph .cat{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.1em}
+.ph .name{font-family:var(--serif);font-weight:600;font-size:16.5px;line-height:1.25;color:var(--ink)}
+.ph .meta{font-size:11.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ph .tally{display:flex;gap:9px;font-family:var(--mono);font-size:11.5px;margin-top:3px;font-variant-numeric:tabular-nums}
+.ph .tally span{color:var(--ink-3)} .ph .tally b{font-weight:600;color:var(--ink-2);margin-right:2px}
+.ph .tally .hit b{color:var(--hit)} .ph .tally .partial b{color:var(--partial)} .ph .tally .miss b{color:var(--miss)} .ph .tally .pending b{color:var(--pending)}
+.ph .bar{display:flex;height:4px;border-radius:2px;overflow:hidden;background:var(--line);margin-top:4px;gap:2px}
+.ph .bar i{display:block;height:100%}
+.ph .bar .hit{background:var(--hit)} .ph .bar .partial{background:var(--partial)} .ph .bar .miss{background:var(--miss)} .ph .bar .pending{background:var(--pending)} .ph .bar .unf{background:var(--unf)}
+
+.board{overflow-x:auto;overscroll-behavior-x:contain}
+.band{border-bottom:1px solid var(--line)}
+.band.alt .cell{background:color-mix(in oklab,var(--surface) 45%,var(--bg))}
+.rail{position:sticky;left:0;z-index:3;background:var(--bg);border-right:1px solid var(--line-2);padding:12px 10px;font-family:var(--mono);font-variant-numeric:tabular-nums;display:flex;flex-direction:column;gap:2px}
+.rail .y{font-size:20px;font-weight:600;line-height:1;color:var(--ink);letter-spacing:-.01em}
+.rail .y.far{font-size:16px}
+.rail .d{font-size:10.5px;color:var(--ink-3);letter-spacing:.04em}
+.cell{padding:8px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:8px;min-height:52px}
+.card{display:flex;flex-direction:column;gap:5px;text-align:left;padding:8px 10px 8px 11px;border-radius:6px;border:1px solid var(--line-2);background:var(--surface);cursor:pointer;position:relative;width:100%;box-shadow:none;transition:border-color .12s,transform .12s}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:6px 0 0 6px;background:var(--unf)}
+.card:hover{border-color:var(--ink-3);transform:translateY(-1px)}
+.card.hit::before{background:var(--hit)} .card.partial::before{background:var(--partial)} .card.miss::before{background:var(--miss)} .card.pending::before{background:var(--pending)} .card.unf::before{background:var(--unf)}
+.card.hit{background:color-mix(in oklab,var(--hit) 9%,var(--surface))}
+.card.partial{background:color-mix(in oklab,var(--partial) 9%,var(--surface))}
+.card.miss{background:color-mix(in oklab,var(--miss) 9%,var(--surface))}
+.card.pending{background:color-mix(in oklab,var(--pending) 8%,var(--surface))}
+.card .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card .t{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);letter-spacing:.02em;font-variant-numeric:tabular-nums}
+.card .who{display:none;font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--ink)}
+.card .claim{font-size:13px;line-height:1.5;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.stamp{font-family:var(--serif);font-weight:900;font-size:11px;letter-spacing:.06em;line-height:1;padding:3px 5px 2px;border:1.5px solid currentColor;border-radius:3px;transform:rotate(-6deg);opacity:.92;white-space:nowrap}
+.stamp.hit{color:var(--hit)} .stamp.partial{color:var(--partial)} .stamp.miss{color:var(--miss)} .stamp.pending{color:var(--pending);transform:none;opacity:.8;border-style:dashed} .stamp.unf{color:var(--unf);transform:none;opacity:.8;border-style:dotted}
+
+.now{border-bottom:2px solid var(--accent);border-top:2px solid var(--accent);background:color-mix(in oklab,var(--accent) 10%,var(--bg))}
+.now .rail{background:color-mix(in oklab,var(--accent) 10%,var(--bg));color:var(--accent)}
+.now .rail .y{color:var(--accent);font-size:15px;font-family:var(--serif);font-weight:900}
+.now .nowline{grid-column:2/-1;padding:8px 14px;font-family:var(--mono);font-size:11.5px;color:var(--accent);display:flex;gap:18px;align-items:center;white-space:nowrap;position:sticky;left:var(--railw)}
+.now .nowline b{font-weight:600}
+.empty{padding:48px 24px;text-align:center;color:var(--ink-3);font-size:14px}
+
+/* ---------- mobile: list mode ---------- */
+@media (max-width:760px){
+  .headstrip{display:none}
+  .board{overflow:visible}
+  .grid{display:block;width:auto}
+  .band{padding:4px 0 10px}
+  .rail{position:static;border-right:0;flex-direction:row;align-items:baseline;gap:10px;padding:12px 16px 4px;background:transparent}
+  .cell{border-right:0;padding:4px 16px;min-height:0}
+  .cell:empty{display:none}
+  .card .who{display:block}
+  .now .nowline{position:static}
+  .band.alt .cell{background:transparent}
+}
+
+/* ---------- drawer ---------- */
+.scrim{position:fixed;inset:0;background:rgba(5,8,18,.55);z-index:20;opacity:0;pointer-events:none;transition:opacity .15s}
+.scrim.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(460px,100%);background:var(--surface);border-left:1px solid var(--line-2);z-index:21;transform:translateX(102%);transition:transform .18s ease-out;overflow-y:auto;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.drawer.open{transform:none}
+@media (prefers-reduced-motion: reduce){ .drawer,.scrim{transition:none} }
+.drawer .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:18px 20px 12px;border-bottom:1px solid var(--line)}
+.drawer .hd .cat{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.12em}
+.drawer .hd .name{font-family:var(--serif);font-weight:900;font-size:22px;line-height:1.2;margin-top:2px}
+.drawer .hd .meta{font-size:12.5px;color:var(--ink-3);margin-top:2px}
+.close{border:1px solid var(--line-2);background:var(--surface-2);border-radius:999px;width:32px;height:32px;cursor:pointer;color:var(--ink-2);font-size:16px;line-height:1;flex:none}
+.close:hover{color:var(--ink);border-color:var(--accent)}
+.drawer .bd{padding:16px 20px 28px;display:flex;flex-direction:column;gap:16px}
+.kv{display:grid;grid-template-columns:84px 1fr;gap:6px 12px;font-size:13px}
+.kv dt{color:var(--ink-3);font-family:var(--mono);font-size:11px;letter-spacing:.08em;padding-top:2px}
+.kv dd{margin:0;color:var(--ink)}
+.kv dd.mono{font-family:var(--mono);font-size:13px}
+.big-claim{font-family:var(--serif);font-size:17px;line-height:1.55;font-weight:600;color:var(--ink);text-wrap:pretty}
+.verdictbox{border:1px solid var(--line-2);border-radius:8px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;background:var(--surface-2)}
+.verdictbox .stamp{font-size:15px;padding:6px 8px 5px;flex:none;margin-top:2px}
+.verdictbox p{margin:0;font-size:13.5px;line-height:1.6;color:var(--ink)}
+.verdictbox .cf{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin-top:6px;display:block}
+.srclink{font-size:13px;word-break:break-all}
+
+/* ---------- method / footer ---------- */
+.method{border-top:1px solid var(--line);margin-top:8px}
+.method .wrap{padding-top:40px;padding-bottom:40px;display:grid;grid-template-columns:1.1fr 1fr;gap:32px}
+@media (max-width:860px){ .method .wrap{grid-template-columns:1fr} }
+.method h2{font-family:var(--serif);font-weight:900;font-size:22px;margin:0 0 12px}
+.method p{color:var(--ink-2);font-size:14px;max-width:62ch;margin:0 0 10px}
+.defs{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.defs div{display:flex;gap:12px;align-items:flex-start;font-size:13.5px;color:var(--ink-2)}
+.defs .stamp{flex:none;margin-top:3px;font-size:12px}
+.defs b{color:var(--ink);font-weight:600}
+footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+</style>
 </head>
 <body>
 
-<div class="scrollDist"></div>
-<div class="main">
-  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
-    <mask id="m">
-      <g class="cloud1">
-        <rect fill="#fff" width="100%" height="801" y="799" />
-        <image xlink:href="https://assets.codepen.io/721952/cloud1Mask.jpg" width="1200" height="800"/>
-      </g>
-    </mask>
+<header class="mast">
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <div class="wrap">
+    <div class="topbar">
+      <a class="wordmark" href="https://weilai.earth"><b>weilai</b>.earth</a>
+      <button class="themebtn" id="themebtn" type="button" aria-label="切换主题">主题：跟随系统</button>
+    </div>
+    <h1><small>Ledger of the Future</small>未来账本</h1>
+    <p class="thesis">全世界预言家留下的、<em>有明确日期</em>的预言，全部记在一条时间线上。到期的逐条审计，未到期的挂账待验。只记事前说过的话，不记事后的解释。</p>
+    <div class="score" id="score" aria-label="总账"></div>
+  </div>
+</header>
 
-    <image class="sky" xlink:href="https://assets.codepen.io/721952/sky.jpg"  width="1200" height="590" />
-    <image class="mountBg" xlink:href="https://assets.codepen.io/721952/mountBg.png" width="1200" height="800"/>
-    <image class="mountMg" xlink:href="https://assets.codepen.io/721952/mountMg.png" width="1200" height="800"/>
-    <image class="cloud2" xlink:href="https://assets.codepen.io/721952/cloud2.png" width="1200" height="800"/>
-    <image class="mountFg" xlink:href="https://assets.codepen.io/721952/mountFg.png" width="1200" height="800"/>
-    <image class="cloud1" xlink:href="https://assets.codepen.io/721952/cloud1.png" width="1200" height="800"/>
-    <image class="cloud3" xlink:href="https://assets.codepen.io/721952/cloud3.png" width="1200" height="800"/>
-    <text fill="#fff" x="350" y="200">Star Repo</text>
-    <polyline class="arrow" fill="#fff" points="599,250 599,289 590,279 590,282 600,292 610,282 610,279 601,289 601,250" />
+<section class="controls" aria-label="筛选">
+  <div class="wrap">
+    <div class="group" id="catchips"><span class="lbl">分类</span></div>
+    <div class="group" id="outchips"><span class="lbl">结果</span></div>
+    <div class="group">
+      <input class="search" id="q" type="search" placeholder="搜人名 / 国家 / 预言内容" aria-label="搜索">
+      <select class="sel" id="sort" aria-label="列排序">
+        <option value="cat">列：按分类</option>
+        <option value="count">列：按预言数</option>
+        <option value="rate">列：按命中率</option>
+        <option value="fail">列：按落空数</option>
+      </select>
+      <label class="toggle"><input type="checkbox" id="fold" checked> 折叠 2100 年后</label>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+</section>
 
-    <g mask="url(#m)">
-      <rect fill="#fff" width="100%" height="100%" />
-      <text x="350" y="200" fill="#162a43">Github code</text>
-    </g>
-
-    <rect id="arrowBtn" width="100" height="100" opacity="0" x="550" y="220" style="cursor:pointer"/>
-  </svg>
+<div class="boardwrap">
+  <div class="headstrip" id="headstrip"></div>
+  <div class="board" id="board"></div>
 </div>
-<!-- partial -->
-  <script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/gsap-latest-beta.min.js'></script>
-<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/ScrollTrigger.min.js'></script>
-<script src='https://s3-us-west-2.amazonaws.com/s.cdpn.io/16327/ScrollToPlugin3.min.js'></script>
-<script src='https://cdnjs.cloudflare.com/ajax/libs/zepto/1.2.0/zepto.min.js'></script><script  src="./js/timeline.js"></script>
 
+<section class="method">
+  <div class="wrap">
+    <div>
+      <h2>怎么审计</h2>
+      <p>每条预言必须同时满足三件事才入账：<b>有作出时间</b>、<b>有指向的日期</b>、<b>有可查的出处</b>。三者缺一不录。到期后按下面五种结果盖章：</p>
+      <div class="defs">
+        <div><span class="stamp hit">中</span><span><b>命中</b>——事前说出、内容具体、事后确实发生。标准从严：事后才「想起来」的不算。</span></div>
+        <div><span class="stamp partial">半</span><span><b>部分命中</b>——方向对了但细节错，或只发生了一部分。</span></div>
+        <div><span class="stamp miss">落空</span><span><b>落空</b>——到期没发生，或发生的与所说相反。</span></div>
+        <div><span class="stamp unf">不可证</span><span><b>不可证伪</b>——措辞模糊到任何结果都能往上套（「某月会有灾难」「大王从天而降」）。这不是「半对」，这是无法评分。</span></div>
+        <div><span class="stamp pending">待</span><span><b>待验证</b>——日期未到。到期之日自动转入审计。</span></div>
+      </div>
+    </div>
+    <div>
+      <h2>数据从哪来</h2>
+      <p>每条预言附原始出处链接：本人官方渠道、原帖存档、维基百科或权威媒体。已删号的「未来人」只剩第三方存档，会在出处里注明。</p>
+      <p>网上流传的「巴巴·万加逐年清单」等来源可疑的文本会照录，但标注「归于其名下、无法追溯到本人」，不给它比别人更高的分量。</p>
+      <p>「归到某人名下」的小报预言（每年的「诺查丹玛斯 2026 预言」）只有在原文确有该年份时才记，否则视为小报再创作。</p>
+      <p>发现错漏或想补充人物，改 <span class="mono">index.html</span> 里的数据块即可，一条一个对象。</p>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap"><span>weilai.earth · 未来账本</span><span id="builddate"></span></div></footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="dname" hidden>
+  <div class="hd">
+    <div>
+      <div class="cat" id="dcat"></div>
+      <div class="name" id="dname"></div>
+      <div class="meta" id="dmeta"></div>
+    </div>
+    <button class="close" id="dclose" type="button" aria-label="关闭">×</button>
+  </div>
+  <div class="bd">
+    <div class="big-claim" id="dclaim"></div>
+    <dl class="kv">
+      <dt>作出时间</dt><dd class="mono" id="don"></dd>
+      <dt>指向时间</dt><dd class="mono" id="dt"></dd>
+      <dt>发布于</dt><dd id="dwhere"></dd>
+    </dl>
+    <div class="verdictbox"><span class="stamp" id="dstamp"></span><div><p id="dverdict"></p><span class="cf" id="dconf"></span></div></div>
+    <div class="srclink"><a id="dsrc" href="#" target="_blank" rel="noopener noreferrer"></a></div>
+  </div>
+</aside>
+
+<!-- ===================== 数据：人物 + 预言（一条一个对象） ===================== -->
+<script id="data" type="application/json">
+{
+  "built": "2026-09-08",
+  "cats": {"classic":"古典预言","traveler":"网络未来人","modern":"现代通灵·占星","doom":"末日预言","control":"对照组"},
+  "people": [
+    {"id":"nostradamus","name":"诺查丹玛斯","en":"Nostradamus","country":"法国","cat":"classic","where":"《诸世纪》(1555)"},
+    {"id":"vanga","name":"巴巴·万加","en":"Baba Vanga","country":"保加利亚","cat":"classic","where":"口述·他人转述"},
+    {"id":"cayce","name":"爱德加·凯西","en":"Edgar Cayce","country":"美国","cat":"classic","where":"催眠解读记录 (A.R.E.)"},
+    {"id":"dixon","name":"珍妮·狄克逊","en":"Jeane Dixon","country":"美国","cat":"classic","where":"《Parade》专栏 / 著作"},
+    {"id":"malachy","name":"圣马拉奇","en":"St. Malachy","country":"爱尔兰","cat":"classic","where":"《教皇预言》(1595 首刊)"},
+    {"id":"shipton","name":"希普顿修女","en":"Mother Shipton","country":"英国","cat":"classic","where":"1862 Hindley 版"},
+    {"id":"titor","name":"约翰·提托","en":"John Titor","country":"美国","cat":"traveler","where":"Time Travel Institute 论坛"},
+    {"id":"m2062","name":"2062 年未来人","en":"2062年から来た未来人","country":"日本","cat":"traveler","where":"2ch 超自然板 → Twitter"},
+    {"id":"yj","name":"YJ","en":"@YJ943636","country":"日本","cat":"traveler","where":"Twitter（已删号）"},
+    {"id":"kfk","name":"KFK","en":"KFK · 2060","country":"中国","cat":"traveler","where":"豆瓣（已注销）"},
+    {"id":"anand","name":"阿南德","en":"Abhigya Anand","country":"印度","cat":"modern","where":"YouTube"},
+    {"id":"tatsuki","name":"龙树谅","en":"たつき諒","country":"日本","cat":"modern","where":"漫画《我所看见的未来》"},
+    {"id":"wang","name":"王超弘「王老师」","en":"Wang Chao-hung","country":"台湾","cat":"doom","where":"台湾电视媒体"},
+    {"id":"camping","name":"Harold Camping","en":"Harold Camping","country":"美国","cat":"doom","where":"Family Radio"},
+    {"id":"kushal","name":"Kushal Kumar","en":"Kushal Kumar","country":"印度","cat":"modern","where":"英国小报采访"},
+    {"id":"paul","name":"章鱼保罗","en":"Paul the Octopus","country":"德国","cat":"control","where":"Sea Life Oberhausen"}
+  ],
+  "entries": [
+    {"p":"nostradamus","on":"1555","t":"1999-07","claim":"1999 年 7 月，恐怖大王将从天而降（第十纪第 72 首）。","outcome":"miss","verdict":"1999 年 7 月没有任何符合「恐怖大王从天而降」的事件。","src":"https://en.wikipedia.org/wiki/Nostradamus","conf":"high"},
+    {"p":"vanga","on":"1996","t":"2016","claim":"欧洲将不复存在。","outcome":"miss","verdict":"2016 年欧洲存在如常；该条出自网络流传清单，无法追溯到本人。","src":"https://en.wikipedia.org/wiki/Baba_Vanga","conf":"low"},
+    {"p":"dixon","on":"1956-05-13","t":"1963","claim":"1960 年当选的民主党总统将在任内被暗杀或死亡。","outcome":"hit","verdict":"肯尼迪 1960 年当选、1963 年遇刺。但她 1960 年又改口称尼克松会赢。","src":"https://en.wikipedia.org/wiki/Jeane_Dixon","conf":"high"},
+    {"p":"dixon","on":"1960s","t":"2020","claim":"世界末日 / 哈米吉多顿之战在 2020 年到来。","outcome":"miss","verdict":"2020 年没有末日。","src":"https://en.wikipedia.org/wiki/Jeane_Dixon","conf":"high"},
+    {"p":"malachy","on":"1595","t":"2025","claim":"本笃十六世之后的「罗马人彼得」是末代教皇，其后罗马毁灭、审判降临。","outcome":"miss","verdict":"方济各 2025 年 4 月去世后，利奥十四世 5 月当选——教皇没有终结，罗马也没有毁灭。","src":"https://en.wikipedia.org/wiki/Prophecy_of_the_Popes","conf":"high"},
+    {"p":"shipton","on":"1862","t":"1881","claim":"「世界将在一八八一年终结。」","outcome":"miss","verdict":"1881 年安然无事；这段押韵文本系 Charles Hindley 1862 年伪造，本人已承认。","src":"https://en.wikipedia.org/wiki/Mother_Shipton","conf":"high"},
+    {"p":"titor","on":"2000-11","t":"2004","claim":"美国将于 2004 年爆发内战。","outcome":"miss","verdict":"2004 年美国没有内战。","src":"https://en.wikipedia.org/wiki/John_Titor","conf":"high"},
+    {"p":"titor","on":"2000-11","t":"2015","claim":"2015 年爆发第三次世界大战，俄罗斯对美国核打击。","outcome":"miss","verdict":"没有发生。","src":"https://en.wikipedia.org/wiki/John_Titor","conf":"high"},
+    {"p":"m2062","on":"2010-11-14","t":"2011-03","claim":"打乱的暗号破译为「山に登れ」（上山去），被解读为海啸预警。","outcome":"unf","verdict":"3·11 海啸确实在四个月后发生，但原文只是三个字的暗号，没有时间、地点，事后才被赋予含义。","src":"https://www.bttp.info/pickup/twitter-2062/","conf":"medium"},
+    {"p":"m2062","on":"2010-11-16","t":"2016-04-15","claim":"「任务完成后，我将去往 2016 年 4 月 15 日。」","outcome":"unf","verdict":"熊本地震发生在 2016-04-14/16，但原文只说自己「会去」那一天，并未预言地震。","src":"https://note.com/repo5/n/n01a4415db2a5","conf":"medium"},
+    {"p":"yj","on":"2018-01","t":"2024-08","claim":"2024 年 8 月南海海槽大地震。","outcome":"miss","verdict":"南海海槽大地震没有发生。2024-08-08 日向滩 M7.1 触发了首次「南海海槽临时情报」，信徒据此称「说中一半」，但那不是所预言的大地震。","src":"https://lunablog1.com/yj-yogen/","conf":"high"},
+    {"p":"kfk","on":"2019-06-22","t":"2048","claim":"2048 年后不再有公务员。","outcome":"pending","verdict":"日期未到。","src":"https://www.sohu.com/a/825635412_120101632","conf":"medium"},
+    {"p":"anand","on":"2019-08-22","t":"2020-04","claim":"2019 年 11 月至 2020 年 4 月世界将面临严重危险。","outcome":"unf","verdict":"新冠疫情确在此期间爆发，但「严重危险」没有指明是什么，任何危机都能套上。","src":"https://www.abhigyaanand.com/","conf":"high"},
+    {"p":"anand","on":"2025-12-24","t":"2026-11","claim":"2026 年 11 月中旬是三个关键时段中「最关键」的一个。","outcome":"pending","verdict":"日期未到。","src":"https://www.hk01.com/%E7%86%B1%E7%88%86%E8%A9%B1%E9%A1%8C/60307643/","conf":"high"},
+    {"p":"tatsuki","on":"1999-07","t":"2011-03","claim":"漫画封面：「大灾害在 2011 年 3 月」。","outcome":"hit","verdict":"东日本大地震 2011-03-11 发生。封面文字 1999 年已印出，事前记录确凿；但内容只有「大灾害」三字。","src":"https://ja.wikipedia.org/wiki/%E7%A7%81%E3%81%8C%E8%A6%8B%E3%81%9F%E6%9C%AA%E6%9D%A5","conf":"high"},
+    {"p":"tatsuki","on":"2021-10","t":"2025-07-05","claim":"2025 年 7 月（5 日）日本与菲律宾之间海底喷发，引发三倍于 3·11 的巨大海啸。","outcome":"miss","verdict":"2025 年 7 月没有发生；她本人在 6 月已表示「7 月 5 日」不是确定日期。","src":"https://ja.wikipedia.org/wiki/%E7%A7%81%E3%81%8C%E8%A6%8B%E3%81%9F%E6%9C%AA%E6%9D%A5","conf":"high"},
+    {"p":"wang","on":"2011-04","t":"2011-05-11","claim":"2011 年 5 月 11 日 10:42:37 台湾发生 14 级地震，沿北回归线断成两半，170 米海啸。","outcome":"miss","verdict":"当天当着媒体面什么都没发生；本人后被依社会秩序维护法罚款。","src":"https://zh.wikipedia.org/zh-hans/511%E5%9C%B0%E9%9C%87%E9%A0%90%E8%A8%80","conf":"high"},
+    {"p":"camping","on":"2010","t":"2011-05-21","claim":"2011 年 5 月 21 日「被提」，10 月 21 日世界终结。","outcome":"miss","verdict":"两个日期都平安度过；本人事后承认错误。","src":"https://en.wikipedia.org/wiki/Harold_Camping","conf":"high"},
+    {"p":"kushal","on":"2024-06","t":"2024-06-18","claim":"2024 年 6 月 18 日是第三次世界大战爆发的最可能日期。","outcome":"miss","verdict":"没有发生。","src":"https://en.wikipedia.org/wiki/Kushal_Kumar","conf":"medium"},
+    {"p":"paul","on":"2010-07-09","t":"2010-07-11","claim":"2010 年世界杯决赛西班牙胜荷兰。","outcome":"hit","verdict":"西班牙 1:0 胜。八场全中，概率 1/256。","src":"https://en.wikipedia.org/wiki/Paul_the_Octopus","conf":"high"}
+  ]
+}
+</script>
+
+<script>
+(function(){
+  'use strict';
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const CATS = D.cats;
+  const CATORDER = Object.keys(CATS);
+  const OUT = {
+    hit:{g:'中',label:'命中'}, partial:{g:'半',label:'部分命中'}, miss:{g:'落空',label:'落空'},
+    unf:{g:'不可证',label:'不可证伪'}, pending:{g:'待',label:'待验证'}
+  };
+  const OUTORDER = ['hit','partial','miss','unf','pending'];
+  const byId = Object.fromEntries(D.people.map(p=>[p.id,p]));
+  const today = new Date();
+  const todayISO = today.toISOString().slice(0,10);
+  const nowYear = today.getFullYear();
+
+  // ---- state ----
+  const state = { cat:'all', outs:new Set(OUTORDER), q:'', sort:'cat', fold:true };
+  try{ const s = localStorage.getItem('wl.theme'); if(s) document.documentElement.setAttribute('data-theme', s); }catch(e){}
+
+  // ---- helpers ----
+  const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const yearOf = t => parseInt(String(t).slice(0,4),10);
+  const fmtT = t => { t=String(t); return t.length===4? t+' 年' : t.length===7? t.replace('-',' 年 ')+' 月' : t; };
+  const fmtOn = t => { t=String(t); if(/^\d{4}s$/.test(t)) return t.slice(0,4)+' 年代'; return fmtT(t); };
+  const bandKeyOf = y => (state.fold && y>=2100) ? Math.floor(y/100)*100 : y;
+  const bandLabel = k => (state.fold && k>=2100) ? Math.floor(k/100)+'xx' : String(k);
+  const distLabel = k => {
+    const y = (state.fold && k>=2100) ? k : k;
+    const d = y - nowYear;
+    if(d===0) return '今年';
+    return d>0 ? '距今 '+d+' 年' : Math.abs(d)+' 年前';
+  };
+
+  // ---- per-person tally (all entries) ----
+  const tally = {};
+  for(const p of D.people){ tally[p.id] = {hit:0,partial:0,miss:0,unf:0,pending:0,n:0}; }
+  for(const e of D.entries){ const t = tally[e.p]; if(!t) continue; t[e.outcome] = (t[e.outcome]||0)+1; t.n++; }
+  const rateOf = id => { const t=tally[id]; const v=t.hit+t.partial+t.miss; return v? (t.hit+0.5*t.partial)/v : -1; };
+
+  // ---- scoreboard ----
+  (function(){
+    const tot = {hit:0,partial:0,miss:0,unf:0,pending:0};
+    for(const e of D.entries) tot[e.outcome]=(tot[e.outcome]||0)+1;
+    const verified = tot.hit+tot.partial+tot.miss;
+    const hitrate = verified? Math.round(100*(tot.hit)/verified) : 0;
+    document.getElementById('score').innerHTML =
+      `<div><span class="k">预言总数</span><span class="v">${D.entries.length}</span><span class="sub">${D.people.length} 位预言家 · 已审计 ${verified} 条 · 不可证 ${tot.unf} 条</span></div>
+       <div><span class="k"><span class="stamp hit">中</span>命中</span><span class="v hit">${tot.hit}</span><span class="sub">占已审计的 ${hitrate}%</span></div>
+       <div><span class="k"><span class="stamp partial">半</span>部分</span><span class="v partial">${tot.partial}</span><span class="sub">方向对、细节错</span></div>
+       <div><span class="k"><span class="stamp miss">落空</span>落空</span><span class="v miss">${tot.miss}</span><span class="sub">到期未发生</span></div>
+       <div><span class="k"><span class="stamp pending">待</span>待验证</span><span class="v pending">${tot.pending}</span><span class="sub">日期未到</span></div>`;
+  })();
+  document.getElementById('builddate').textContent = '数据截至 '+D.built+' · 今日 '+todayISO;
+
+  // ---- controls ----
+  const catchips = document.getElementById('catchips');
+  [['all','全部'],...CATORDER.map(k=>[k,CATS[k]])].forEach(([k,l])=>{
+    const b=document.createElement('button'); b.type='button'; b.className='chip'; b.textContent=l; b.dataset.k=k;
+    b.setAttribute('aria-pressed', k==='all'?'true':'false');
+    b.addEventListener('click',()=>{ state.cat=k; catchips.querySelectorAll('.chip').forEach(c=>c.setAttribute('aria-pressed', c.dataset.k===k?'true':'false')); render(); });
+    catchips.appendChild(b);
+  });
+  const outchips = document.getElementById('outchips');
+  OUTORDER.forEach(k=>{
+    const b=document.createElement('button'); b.type='button'; b.className='chip '+k; b.innerHTML=`<span class="g">${OUT[k].g}</span>${OUT[k].label}`; b.dataset.k=k;
+    b.setAttribute('aria-pressed','true');
+    b.addEventListener('click',()=>{ if(state.outs.has(k)) state.outs.delete(k); else state.outs.add(k); b.setAttribute('aria-pressed', state.outs.has(k)?'true':'false'); render(); });
+    outchips.appendChild(b);
+  });
+  document.getElementById('q').addEventListener('input', e=>{ state.q=e.target.value.trim().toLowerCase(); render(); });
+  document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; render(); });
+  document.getElementById('fold').addEventListener('change', e=>{ state.fold=e.target.checked; render(); });
+
+  // ---- theme ----
+  const themebtn = document.getElementById('themebtn');
+  const themeLabel = ()=>{ const t=document.documentElement.getAttribute('data-theme'); themebtn.textContent = '主题：'+(t==='dark'?'夜':t==='light'?'昼':'跟随系统'); };
+  themebtn.addEventListener('click',()=>{
+    const cur=document.documentElement.getAttribute('data-theme'); const next = !cur?'dark': cur==='dark'?'light':null;
+    if(next) document.documentElement.setAttribute('data-theme',next); else document.documentElement.removeAttribute('data-theme');
+    try{ if(next) localStorage.setItem('wl.theme',next); else localStorage.removeItem('wl.theme'); }catch(e){}
+    themeLabel();
+  });
+  themeLabel();
+
+  // ---- render ----
+  const head = document.getElementById('headstrip');
+  const board = document.getElementById('board');
+  const countEl = document.getElementById('count');
+
+  function personMatches(p){
+    if(state.cat!=='all' && p.cat!==state.cat) return false;
+    return true;
+  }
+  function entryMatches(e){
+    if(!state.outs.has(e.outcome)) return false;
+    if(state.q){
+      const p = byId[e.p];
+      const hay = (p.name+' '+p.en+' '+p.country+' '+e.claim+' '+e.verdict).toLowerCase();
+      if(!hay.includes(state.q)) return false;
+    }
+    return true;
+  }
+
+  function render(){
+    const visEntries = D.entries.filter(e => byId[e.p] && personMatches(byId[e.p]) && entryMatches(e));
+    const pidSet = new Set(visEntries.map(e=>e.p));
+    let people = D.people.filter(p=>pidSet.has(p.id));
+    const cmpCount = (a,b)=> tally[b.id].n - tally[a.id].n;
+    if(state.sort==='cat') people.sort((a,b)=> CATORDER.indexOf(a.cat)-CATORDER.indexOf(b.cat) || cmpCount(a,b));
+    else if(state.sort==='count') people.sort(cmpCount);
+    else if(state.sort==='rate') people.sort((a,b)=> rateOf(b.id)-rateOf(a.id) || cmpCount(a,b));
+    else if(state.sort==='fail') people.sort((a,b)=> tally[b.id].miss - tally[a.id].miss || cmpCount(a,b));
+    const col = Object.fromEntries(people.map((p,i)=>[p.id,i]));
+    const n = people.length;
+    document.documentElement.style.setProperty('--n', String(Math.max(n,1)));
+    countEl.textContent = `显示 ${visEntries.length} / ${D.entries.length} 条 · ${n} 列`;
+
+    // header strip
+    head.innerHTML = `<div class="grid">
+      <div class="corner"><span class="lbl">年份</span><div class="nav"><button type="button" data-dir="-1" aria-label="向左一列">‹</button><button type="button" data-dir="1" aria-label="向右一列">›</button></div></div>
+      ${people.map(p=>{ const t=tally[p.id]; const seg = OUTORDER.map(k=> t[k]? `<i class="${k}" style="flex:${t[k]}"></i>`:'').join('');
+        return `<div class="ph"><span class="cat">${esc(CATS[p.cat])}</span><span class="name">${esc(p.name)}</span><span class="meta">${esc(p.country)} · ${esc(p.en)}</span>
+          <span class="tally"><span class="hit"><b>${t.hit}</b>中</span><span class="partial"><b>${t.partial}</b>半</span><span class="miss"><b>${t.miss}</b>空</span><span class="pending"><b>${t.pending}</b>待</span></span>
+          <span class="bar">${seg}</span></div>`; }).join('')}
+    </div>`;
+
+    if(!n){ board.innerHTML = '<div class="empty">没有符合筛选条件的预言。</div>'; return; }
+
+    // bands
+    const bands = new Map();
+    for(const e of visEntries){ const k = bandKeyOf(yearOf(e.t)); if(!bands.has(k)) bands.set(k,[]); bands.get(k).push(e); }
+    const keys = [...bands.keys()].sort((a,b)=>a-b);
+    let html = '<div class="grid">'; let nowDone=false; let alt=false;
+    const nowRow = `<div class="band now" style="display:contents"><div class="rail"><span class="y">现在</span><span class="d">${todayISO}</span></div><div class="nowline"><b>↑ 已到期 · 逐条审计</b><span>↓ 未到期 · 挂账待验</span></div></div>`;
+    for(const k of keys){
+      if(!nowDone && k>nowYear){ html += nowRow; nowDone=true; }
+      const list = bands.get(k).sort((a,b)=> String(a.t).localeCompare(String(b.t)));
+      const cells = new Array(n).fill('');
+      for(const e of list){ cells[col[e.p]] += card(e); }
+      html += `<div class="band${alt?' alt':''}" style="display:contents"><div class="rail"><span class="y${k>=2100?' far':''}">${bandLabel(k)}</span><span class="d">${distLabel(k)}</span></div>${cells.map(c=>`<div class="cell">${c}</div>`).join('')}</div>`;
+      alt=!alt;
+    }
+    if(!nowDone) html += nowRow;
+    html += '</div>';
+    board.innerHTML = html;
+    head.scrollLeft = board.scrollLeft;
+  }
+  function card(e){
+    const p = byId[e.p]; const o = OUT[e.outcome]||OUT.unf; const idx = D.entries.indexOf(e);
+    return `<button type="button" class="card ${esc(e.outcome)}" data-i="${idx}" aria-label="${esc(p.name)}：${esc(e.claim)}（${o.label}）">
+      <span class="row"><span class="t">${esc(fmtT(e.t))}</span><span class="stamp ${esc(e.outcome)}">${o.g}</span></span>
+      <span class="who">${esc(p.name)}</span>
+      <span class="claim">${esc(e.claim)}</span></button>`;
+  }
+
+  // header/board horizontal sync + column nav
+  board.addEventListener('scroll', ()=>{ head.scrollLeft = board.scrollLeft; }, {passive:true});
+  head.addEventListener('click', e=>{ const b=e.target.closest('button[data-dir]'); if(!b) return; const w=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--colw'))||236; board.scrollBy({left: w*parseInt(b.dataset.dir,10), behavior:'smooth'}); });
+
+  // ---- drawer ----
+  const drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim'); let lastFocus=null;
+  function openDrawer(e){
+    const p=byId[e.p]; const o=OUT[e.outcome]||OUT.unf;
+    document.getElementById('dcat').textContent = CATS[p.cat];
+    document.getElementById('dname').textContent = p.name;
+    document.getElementById('dmeta').textContent = p.country+' · '+p.en;
+    document.getElementById('dclaim').textContent = e.claim;
+    document.getElementById('don').textContent = fmtOn(e.on);
+    document.getElementById('dt').textContent = fmtT(e.t);
+    document.getElementById('dwhere').textContent = p.where||'—';
+    const st=document.getElementById('dstamp'); st.className='stamp '+e.outcome; st.textContent=o.g;
+    document.getElementById('dverdict').textContent = e.verdict;
+    document.getElementById('dconf').textContent = '出处把握：'+({high:'高',medium:'中',low:'低'}[e.conf]||e.conf||'—');
+    const a=document.getElementById('dsrc'); a.href=e.src; a.textContent='出处 → '+e.src.replace(/^https?:\/\//,'').slice(0,60)+(e.src.length>68?'…':'');
+    lastFocus=document.activeElement; drawer.hidden=false; requestAnimationFrame(()=>{ drawer.classList.add('open'); scrim.classList.add('open'); document.getElementById('dclose').focus(); });
+  }
+  function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('open'); setTimeout(()=>{ drawer.hidden=true; }, 200); if(lastFocus) lastFocus.focus(); }
+  board.addEventListener('click', e=>{ const c=e.target.closest('.card'); if(!c) return; openDrawer(D.entries[parseInt(c.dataset.i,10)]); });
+  document.getElementById('dclose').addEventListener('click', closeDrawer);
+  scrim.addEventListener('click', closeDrawer);
+  document.addEventListener('keydown', e=>{ if(e.key==='Escape' && !drawer.hidden) closeDrawer(); });
+
+  render();
+
+  // ---- ambient star field (masthead only; static under reduced motion) ----
+  (function(){
+    const c=document.getElementById('stars'); const ctx=c.getContext('2d'); if(!ctx) return;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let stars=[], raf=0, last=0, w=0, h=0;
+    function size(){ const r=c.parentElement.getBoundingClientRect(); const dpr=Math.min(devicePixelRatio||1,2); w=r.width; h=r.height; c.width=Math.round(w*dpr); c.height=Math.round(h*dpr); ctx.setTransform(dpr,0,0,dpr,0,0);
+      stars=Array.from({length:Math.round(w*h/9000)},()=>({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.1+.3,a:Math.random()*Math.PI*2,s:.4+Math.random()*.6})); draw(0); }
+    function draw(t){ ctx.clearRect(0,0,w,h); const dark = getComputedStyle(document.documentElement).colorScheme.includes('dark'); const base = dark? '230,184,92' : '154,107,18';
+      for(const s of stars){ const tw = reduced? .7 : .45+.35*Math.sin(s.a + t/1400*s.s); ctx.fillStyle=`rgba(${base},${(tw*0.55).toFixed(3)})`; ctx.fillRect(s.x,s.y,s.r*1.6,s.r*1.6); } }
+    function frame(t){ if(t-last>100){ last=t; draw(t); } raf=requestAnimationFrame(frame); }
+    size(); addEventListener('resize', size);
+    if(!reduced){ raf=requestAnimationFrame(frame); document.addEventListener('visibilitychange',()=>{ if(document.hidden){ cancelAnimationFrame(raf); raf=0; } else if(!raf) raf=requestAnimationFrame(frame); }); }
+  })();
+})();
+</script>
 </body>
 </html>
