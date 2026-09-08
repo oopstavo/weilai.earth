@@ -128,6 +128,7 @@ select.sel{border:1px solid var(--line-2);background:var(--surface);border-radiu
 .card .row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .card .t{font-family:var(--mono);font-size:11.5px;color:var(--ink-2);letter-spacing:.02em;font-variant-numeric:tabular-nums}
 .card .who{display:none;font-family:var(--serif);font-weight:600;font-size:12.5px;color:var(--ink)}
+.card .low{font-size:10px;color:var(--ink-3);border:1px dotted var(--ink-3);border-radius:3px;padding:0 4px;margin-left:4px;letter-spacing:0}
 .card .claim{font-size:13px;line-height:1.5;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .stamp{font-family:var(--serif);font-weight:900;font-size:11px;letter-spacing:.06em;line-height:1;padding:3px 5px 2px;border:1.5px solid currentColor;border-radius:3px;transform:rotate(-6deg);opacity:.92;white-space:nowrap}
 .stamp.hit{color:var(--hit)} .stamp.partial{color:var(--partial)} .stamp.miss{color:var(--miss)} .stamp.pending{color:var(--pending);transform:none;opacity:.8;border-style:dashed} .stamp.unf{color:var(--unf);transform:none;opacity:.8;border-style:dotted}
@@ -218,6 +219,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
         <option value="fail">列：按落空数</option>
       </select>
       <label class="toggle"><input type="checkbox" id="fold" checked> 折叠 2100 年后</label>
+      <label class="toggle"><input type="checkbox" id="hidelow"> 隐藏低把握（伪托）条目</label>
     </div>
     <div class="count" id="count"></div>
   </div>
@@ -246,7 +248,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
       <p>每条预言附原始出处链接：本人官方渠道、原帖存档、维基百科或权威媒体。已删号的「未来人」只剩第三方存档，会在出处里注明。</p>
       <p>网上流传的「巴巴·万加逐年清单」等来源可疑的文本会照录，但标注「归于其名下、无法追溯到本人」，不给它比别人更高的分量。</p>
       <p>「归到某人名下」的小报预言（每年的「诺查丹玛斯 2026 预言」）只有在原文确有该年份时才记，否则视为小报再创作。</p>
-      <p>发现错漏或想补充人物，改 <span class="mono">index.html</span> 里的数据块即可，一条一个对象。</p>
+      <p>发现错漏或想补充人物，改仓库 <span class="mono">data/</span> 下的 JSON 即可：<span class="mono">index.json</span> 管人物与分类，<span class="mono">entries-N.json</span> 管预言，一条一个对象，页面加载时读取。</p>
     </div>
   </div>
 </section>
@@ -277,56 +279,12 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
 
 <!-- ===================== 数据：人物 + 预言（一条一个对象） ===================== -->
 <script id="data" type="application/json">
-{
-  "built": "2026-09-08",
-  "cats": {"classic":"古典预言","traveler":"网络未来人","modern":"现代通灵·占星","doom":"末日预言","control":"对照组"},
-  "people": [
-    {"id":"nostradamus","name":"诺查丹玛斯","en":"Nostradamus","country":"法国","cat":"classic","where":"《诸世纪》(1555)"},
-    {"id":"vanga","name":"巴巴·万加","en":"Baba Vanga","country":"保加利亚","cat":"classic","where":"口述·他人转述"},
-    {"id":"cayce","name":"爱德加·凯西","en":"Edgar Cayce","country":"美国","cat":"classic","where":"催眠解读记录 (A.R.E.)"},
-    {"id":"dixon","name":"珍妮·狄克逊","en":"Jeane Dixon","country":"美国","cat":"classic","where":"《Parade》专栏 / 著作"},
-    {"id":"malachy","name":"圣马拉奇","en":"St. Malachy","country":"爱尔兰","cat":"classic","where":"《教皇预言》(1595 首刊)"},
-    {"id":"shipton","name":"希普顿修女","en":"Mother Shipton","country":"英国","cat":"classic","where":"1862 Hindley 版"},
-    {"id":"titor","name":"约翰·提托","en":"John Titor","country":"美国","cat":"traveler","where":"Time Travel Institute 论坛"},
-    {"id":"m2062","name":"2062 年未来人","en":"2062年から来た未来人","country":"日本","cat":"traveler","where":"2ch 超自然板 → Twitter"},
-    {"id":"yj","name":"YJ","en":"@YJ943636","country":"日本","cat":"traveler","where":"Twitter（已删号）"},
-    {"id":"kfk","name":"KFK","en":"KFK · 2060","country":"中国","cat":"traveler","where":"豆瓣（已注销）"},
-    {"id":"anand","name":"阿南德","en":"Abhigya Anand","country":"印度","cat":"modern","where":"YouTube"},
-    {"id":"tatsuki","name":"龙树谅","en":"たつき諒","country":"日本","cat":"modern","where":"漫画《我所看见的未来》"},
-    {"id":"wang","name":"王超弘「王老师」","en":"Wang Chao-hung","country":"台湾","cat":"doom","where":"台湾电视媒体"},
-    {"id":"camping","name":"Harold Camping","en":"Harold Camping","country":"美国","cat":"doom","where":"Family Radio"},
-    {"id":"kushal","name":"Kushal Kumar","en":"Kushal Kumar","country":"印度","cat":"modern","where":"英国小报采访"},
-    {"id":"paul","name":"章鱼保罗","en":"Paul the Octopus","country":"德国","cat":"control","where":"Sea Life Oberhausen"}
-  ],
-  "entries": [
-    {"p":"nostradamus","on":"1555","t":"1999-07","claim":"1999 年 7 月，恐怖大王将从天而降（第十纪第 72 首）。","outcome":"miss","verdict":"1999 年 7 月没有任何符合「恐怖大王从天而降」的事件。","src":"https://en.wikipedia.org/wiki/Nostradamus","conf":"high"},
-    {"p":"vanga","on":"1996","t":"2016","claim":"欧洲将不复存在。","outcome":"miss","verdict":"2016 年欧洲存在如常；该条出自网络流传清单，无法追溯到本人。","src":"https://en.wikipedia.org/wiki/Baba_Vanga","conf":"low"},
-    {"p":"dixon","on":"1956-05-13","t":"1963","claim":"1960 年当选的民主党总统将在任内被暗杀或死亡。","outcome":"hit","verdict":"肯尼迪 1960 年当选、1963 年遇刺。但她 1960 年又改口称尼克松会赢。","src":"https://en.wikipedia.org/wiki/Jeane_Dixon","conf":"high"},
-    {"p":"dixon","on":"1960s","t":"2020","claim":"世界末日 / 哈米吉多顿之战在 2020 年到来。","outcome":"miss","verdict":"2020 年没有末日。","src":"https://en.wikipedia.org/wiki/Jeane_Dixon","conf":"high"},
-    {"p":"malachy","on":"1595","t":"2025","claim":"本笃十六世之后的「罗马人彼得」是末代教皇，其后罗马毁灭、审判降临。","outcome":"miss","verdict":"方济各 2025 年 4 月去世后，利奥十四世 5 月当选——教皇没有终结，罗马也没有毁灭。","src":"https://en.wikipedia.org/wiki/Prophecy_of_the_Popes","conf":"high"},
-    {"p":"shipton","on":"1862","t":"1881","claim":"「世界将在一八八一年终结。」","outcome":"miss","verdict":"1881 年安然无事；这段押韵文本系 Charles Hindley 1862 年伪造，本人已承认。","src":"https://en.wikipedia.org/wiki/Mother_Shipton","conf":"high"},
-    {"p":"titor","on":"2000-11","t":"2004","claim":"美国将于 2004 年爆发内战。","outcome":"miss","verdict":"2004 年美国没有内战。","src":"https://en.wikipedia.org/wiki/John_Titor","conf":"high"},
-    {"p":"titor","on":"2000-11","t":"2015","claim":"2015 年爆发第三次世界大战，俄罗斯对美国核打击。","outcome":"miss","verdict":"没有发生。","src":"https://en.wikipedia.org/wiki/John_Titor","conf":"high"},
-    {"p":"m2062","on":"2010-11-14","t":"2011-03","claim":"打乱的暗号破译为「山に登れ」（上山去），被解读为海啸预警。","outcome":"unf","verdict":"3·11 海啸确实在四个月后发生，但原文只是三个字的暗号，没有时间、地点，事后才被赋予含义。","src":"https://www.bttp.info/pickup/twitter-2062/","conf":"medium"},
-    {"p":"m2062","on":"2010-11-16","t":"2016-04-15","claim":"「任务完成后，我将去往 2016 年 4 月 15 日。」","outcome":"unf","verdict":"熊本地震发生在 2016-04-14/16，但原文只说自己「会去」那一天，并未预言地震。","src":"https://note.com/repo5/n/n01a4415db2a5","conf":"medium"},
-    {"p":"yj","on":"2018-01","t":"2024-08","claim":"2024 年 8 月南海海槽大地震。","outcome":"miss","verdict":"南海海槽大地震没有发生。2024-08-08 日向滩 M7.1 触发了首次「南海海槽临时情报」，信徒据此称「说中一半」，但那不是所预言的大地震。","src":"https://lunablog1.com/yj-yogen/","conf":"high"},
-    {"p":"kfk","on":"2019-06-22","t":"2048","claim":"2048 年后不再有公务员。","outcome":"pending","verdict":"日期未到。","src":"https://www.sohu.com/a/825635412_120101632","conf":"medium"},
-    {"p":"anand","on":"2019-08-22","t":"2020-04","claim":"2019 年 11 月至 2020 年 4 月世界将面临严重危险。","outcome":"unf","verdict":"新冠疫情确在此期间爆发，但「严重危险」没有指明是什么，任何危机都能套上。","src":"https://www.abhigyaanand.com/","conf":"high"},
-    {"p":"anand","on":"2025-12-24","t":"2026-11","claim":"2026 年 11 月中旬是三个关键时段中「最关键」的一个。","outcome":"pending","verdict":"日期未到。","src":"https://www.hk01.com/%E7%86%B1%E7%88%86%E8%A9%B1%E9%A1%8C/60307643/","conf":"high"},
-    {"p":"tatsuki","on":"1999-07","t":"2011-03","claim":"漫画封面：「大灾害在 2011 年 3 月」。","outcome":"hit","verdict":"东日本大地震 2011-03-11 发生。封面文字 1999 年已印出，事前记录确凿；但内容只有「大灾害」三字。","src":"https://ja.wikipedia.org/wiki/%E7%A7%81%E3%81%8C%E8%A6%8B%E3%81%9F%E6%9C%AA%E6%9D%A5","conf":"high"},
-    {"p":"tatsuki","on":"2021-10","t":"2025-07-05","claim":"2025 年 7 月（5 日）日本与菲律宾之间海底喷发，引发三倍于 3·11 的巨大海啸。","outcome":"miss","verdict":"2025 年 7 月没有发生；她本人在 6 月已表示「7 月 5 日」不是确定日期。","src":"https://ja.wikipedia.org/wiki/%E7%A7%81%E3%81%8C%E8%A6%8B%E3%81%9F%E6%9C%AA%E6%9D%A5","conf":"high"},
-    {"p":"wang","on":"2011-04","t":"2011-05-11","claim":"2011 年 5 月 11 日 10:42:37 台湾发生 14 级地震，沿北回归线断成两半，170 米海啸。","outcome":"miss","verdict":"当天当着媒体面什么都没发生；本人后被依社会秩序维护法罚款。","src":"https://zh.wikipedia.org/zh-hans/511%E5%9C%B0%E9%9C%87%E9%A0%90%E8%A8%80","conf":"high"},
-    {"p":"camping","on":"2010","t":"2011-05-21","claim":"2011 年 5 月 21 日「被提」，10 月 21 日世界终结。","outcome":"miss","verdict":"两个日期都平安度过；本人事后承认错误。","src":"https://en.wikipedia.org/wiki/Harold_Camping","conf":"high"},
-    {"p":"kushal","on":"2024-06","t":"2024-06-18","claim":"2024 年 6 月 18 日是第三次世界大战爆发的最可能日期。","outcome":"miss","verdict":"没有发生。","src":"https://en.wikipedia.org/wiki/Kushal_Kumar","conf":"medium"},
-    {"p":"paul","on":"2010-07-09","t":"2010-07-11","claim":"2010 年世界杯决赛西班牙胜荷兰。","outcome":"hit","verdict":"西班牙 1:0 胜。八场全中，概率 1/256。","src":"https://en.wikipedia.org/wiki/Paul_the_Octopus","conf":"high"}
-  ]
-}
+{}
 </script>
 
 <script>
-(function(){
+function init(D){
   'use strict';
-  const D = JSON.parse(document.getElementById('data').textContent);
   const CATS = D.cats;
   const CATORDER = Object.keys(CATS);
   const OUT = {
@@ -340,7 +298,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
   const nowYear = today.getFullYear();
 
   // ---- state ----
-  const state = { cat:'all', outs:new Set(OUTORDER), q:'', sort:'cat', fold:true };
+  const state = { cat:'all', outs:new Set(OUTORDER), q:'', sort:'cat', fold:true, hideLow:false };
   try{ const s = localStorage.getItem('wl.theme'); if(s) document.documentElement.setAttribute('data-theme', s); }catch(e){}
 
   // ---- helpers ----
@@ -351,9 +309,9 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
   const bandKeyOf = y => (state.fold && y>=2100) ? Math.floor(y/100)*100 : y;
   const bandLabel = k => (state.fold && k>=2100) ? Math.floor(k/100)+'xx' : String(k);
   const distLabel = k => {
-    const y = (state.fold && k>=2100) ? k : k;
-    const d = y - nowYear;
+    const d = k - nowYear;
     if(d===0) return '今年';
+    if(state.fold && k>=2100) return '距今 '+d+'+ 年';
     return d>0 ? '距今 '+d+' 年' : Math.abs(d)+' 年前';
   };
 
@@ -396,6 +354,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
   document.getElementById('q').addEventListener('input', e=>{ state.q=e.target.value.trim().toLowerCase(); render(); });
   document.getElementById('sort').addEventListener('change', e=>{ state.sort=e.target.value; render(); });
   document.getElementById('fold').addEventListener('change', e=>{ state.fold=e.target.checked; render(); });
+  document.getElementById('hidelow').addEventListener('change', e=>{ state.hideLow=e.target.checked; render(); });
 
   // ---- theme ----
   const themebtn = document.getElementById('themebtn');
@@ -419,6 +378,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
   }
   function entryMatches(e){
     if(!state.outs.has(e.outcome)) return false;
+    if(state.hideLow && e.conf==='low') return false;
     if(state.q){
       const p = byId[e.p];
       const hay = (p.name+' '+p.en+' '+p.country+' '+e.claim+' '+e.verdict).toLowerCase();
@@ -474,7 +434,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
   function card(e){
     const p = byId[e.p]; const o = OUT[e.outcome]||OUT.unf; const idx = D.entries.indexOf(e);
     return `<button type="button" class="card ${esc(e.outcome)}" data-i="${idx}" aria-label="${esc(p.name)}：${esc(e.claim)}（${o.label}）">
-      <span class="row"><span class="t">${esc(fmtT(e.t))}</span><span class="stamp ${esc(e.outcome)}">${o.g}</span></span>
+      <span class="row"><span class="t">${esc(fmtT(e.t))}${e.conf==='low'?' <span class="low">伪托?</span>':''}</span><span class="stamp ${esc(e.outcome)}">${o.g}</span></span>
       <span class="who">${esc(p.name)}</span>
       <span class="claim">${esc(e.claim)}</span></button>`;
   }
@@ -491,7 +451,7 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
     document.getElementById('dname').textContent = p.name;
     document.getElementById('dmeta').textContent = p.country+' · '+p.en;
     document.getElementById('dclaim').textContent = e.claim;
-    document.getElementById('don').textContent = fmtOn(e.on);
+    document.getElementById('don').textContent = e.on ? fmtOn(e.on) : '不详';
     document.getElementById('dt').textContent = fmtT(e.t);
     document.getElementById('dwhere').textContent = p.where||'—';
     const st=document.getElementById('dstamp'); st.className='stamp '+e.outcome; st.textContent=o.g;
@@ -521,6 +481,21 @@ footer .wrap{padding:18px 24px 40px;display:flex;justify-content:space-between;f
     size(); addEventListener('resize', size);
     if(!reduced){ raf=requestAnimationFrame(frame); document.addEventListener('visibilitychange',()=>{ if(document.hidden){ cancelAnimationFrame(raf); raf=0; } else if(!raf) raf=requestAnimationFrame(frame); }); }
   })();
+}
+// ---- bootstrap: use the inline block when it carries entries (preview build); otherwise fetch data/prophecies.json (deployed site) ----
+(async function(){
+  let d = null;
+  try{ d = JSON.parse(document.getElementById('data').textContent); }catch(e){}
+  if(!(d && d.entries && d.entries.length)){
+    try{
+      const get = async p => { const r = await fetch(p, {cache:'no-cache'}); if(!r.ok) throw new Error(p+' → HTTP '+r.status); return r.json(); };
+      const meta = await get('data/index.json');
+      const parts = await Promise.all((meta.parts||[]).map(p => get('data/'+p)));
+      d = { built: meta.built, cats: meta.cats, people: meta.people, entries: parts.flat() };
+    }
+    catch(err){ document.getElementById('board').textContent = '数据加载失败：'+err.message+'（页面需通过 http 访问才能读取 data/ 下的 JSON）'; return; }
+  }
+  init(d);
 })();
 </script>
 </body>
