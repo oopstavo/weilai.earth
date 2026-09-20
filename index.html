@@ -156,6 +156,10 @@ select.sel{border:0;background:transparent;font-size:13px;color:var(--ink-2);pad
 .verdict p{margin:0;font-size:14px;line-height:1.7;color:var(--ink)}
 .verdict .cf{display:block;font-size:12px;color:var(--ink-3);margin-top:8px}
 .srclink{font-size:13px;word-break:break-all}
+.shot{margin:0;display:flex;flex-direction:column;gap:8px}
+.shot a{display:block;border:1px solid var(--line-2);background:var(--bg-2);overflow:hidden;aspect-ratio:1100/760}
+.shot img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.shot figcaption{font-size:12px;color:var(--ink-3)}
 
 /* ---------- 5 · 方法 ---------- */
 .method{margin-top:64px;border-top:1px solid var(--ink);padding:28px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:48px}
@@ -248,6 +252,7 @@ footer{padding:40px 0 48px;font-size:12.5px;color:var(--ink-3);display:flex;just
       <dt>发布于</dt><dd id="dwhere"></dd>
     </dl>
     <div class="verdict" id="dverdictbox"><p class="o" id="dout"></p><p id="dverdict"></p><span class="cf" id="dconf"></span></div>
+    <figure class="shot" id="dshot" hidden><a id="dshota" href="#" target="_blank" rel="noopener noreferrer"><img id="dshotimg" alt="" loading="lazy"></a><figcaption id="dshotcap"></figcaption></figure>
     <div class="srclink"><a id="dsrc" href="#" target="_blank" rel="noopener noreferrer"></a></div>
   </div>
 </aside>
@@ -403,6 +408,17 @@ function init(D){
 
   // ---- 详情 ----
   const drawer=document.getElementById('drawer'), scrim=document.getElementById('scrim'); let lastFocus=null;
+  let shots = null, shotsReq = null;
+  const loadShots = () => shotsReq || (shotsReq = fetch('data/shots/index.json', {cache:'no-cache'}).then(r=> r.ok ? r.json() : {}).catch(()=>({})).then(m=>{ shots=m; return m; }));
+  function fillShot(e){
+    const fig=document.getElementById('dshot'); fig.hidden=true;
+    const s = shots && shots[e.src];
+    if(!s || s.status!=='ok') return;
+    const img=document.getElementById('dshotimg'); img.src='data/shots/'+s.file; img.alt='出处页面截图：'+(s.title||e.src);
+    document.getElementById('dshota').href=e.src;
+    document.getElementById('dshotcap').textContent='出处页面截图 · 抓取于 '+s.at+(s.title?' · '+s.title:'');
+    fig.hidden=false;
+  }
   function openDrawer(e){
     const p=byId[e.p];
     document.getElementById('dcat').textContent = CATS[p.cat];
@@ -417,6 +433,7 @@ function init(D){
     document.getElementById('dverdict').textContent = e.verdict;
     document.getElementById('dconf').textContent = '出处把握：'+({high:'高',medium:'中',low:'低（出处存疑）'}[e.conf]||'—');
     const a=document.getElementById('dsrc'); a.href=e.src; a.textContent=e.src.replace(/^https?:\/\//,'').slice(0,64)+(e.src.length>72?'…':'');
+    if(shots) fillShot(e); else { document.getElementById('dshot').hidden=true; loadShots().then(()=>{ if(!drawer.hidden) fillShot(e); }); }
     lastFocus=document.activeElement; drawer.hidden=false; requestAnimationFrame(()=>{ drawer.classList.add('open'); scrim.classList.add('open'); document.getElementById('dclose').focus(); });
   }
   function closeDrawer(){ drawer.classList.remove('open'); scrim.classList.remove('open'); setTimeout(()=>{ drawer.hidden=true; }, 200); if(lastFocus) lastFocus.focus(); }
