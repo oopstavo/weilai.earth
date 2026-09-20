@@ -342,24 +342,32 @@
   "title": "2062年から来た未来人が書き込んだ結果は当たっている？（３）昔ネットをざわつかした未来人の書き込みを、今2024・2025年に改めて振り返ってみました｜ウメサブロウのなんやかんや"
  },
  "https://jin-oki.com/world-11/": {
+  "file": "111354c344171826.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "2chまとめ 2062年から来た未来人の話 この世界シリーズ11 - 人生 攻略サイト 沖縄局"
  },
  "https://sanblo.com/2chyogenmira/": {
+  "file": "65f652ee95d8be1d.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "【完全版】2062年未来人「おれ、未来（2062年）から来たけど、なんか聞きたい事ある？」 - サンブロ"
  },
  "https://www.bttp.info/pickup/2075twitter-futureman/": {
+  "file": "8890479219b9d884.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "●「未来人がツイッターに登場！」（2075年から来たYJ） | Back to the past"
  },
  "https://lunablog1.com/yj-yogen/": {
+  "file": "a8b87e94bc031005.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "未来人YJの正体を解説！2024年8月の南海トラフ地震予言が怖すぎる… | ルナログ"
  },
  "https://tocana.jp/2018/04/post_16694_entry.html": {
   "at": "2026-09-20",
@@ -368,15 +376,18 @@
   "title": "404 Not Found | TOCANA"
  },
  "https://www.excite.co.jp/news/article/Tocana_201804_post_16694/": {
+  "file": "fd740fdbdddf1277.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
+  "status": "ok",
   "http": 403,
   "title": "ERROR: The request could not be satisfied"
  },
  "https://bousaiseed.com/post-4479": {
+  "file": "e55379d9a50bf313.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "【2150年の未来人XU】南海トラフ巨大地震が起きずに炎上！予言の一覧まとめ │ 防災の種"
  },
  "https://web-mu.jp/history/3495/": {
   "file": "3ee0e6380cee097e.jpg",
@@ -393,9 +404,11 @@
   "title": "國分玲(こくぶれい)の未来予言は嘘と確定!トリックを使い未来人を装う - ステップインフォ"
  },
  "https://adeniumix.com/kokubu-rei-list-of-prophecies/": {
+  "file": "90217bcf3c726ece.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "國分玲　予言一覧｜2025年に再来？7つ的中して2つハズレた未来人の正体は？ | Topic"
  },
  "https://newsmatomedia.com/kokubu-rei": {
   "file": "de831a017ad22fdd.jpg",
@@ -412,15 +425,18 @@
   "title": "未来人の國分玲がツイートした十勝沖地震は起こる？ - 子育て日記｜子供は小学１年生"
  },
  "https://jishin-yogen.com/blog-entry-16932.html": {
+  "file": "a427f6c4526aa60c.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
-  "http": 403,
-  "title": "403 Error - FC2Blog"
+  "status": "ok",
+  "http": 200,
+  "title": "【予言者】2058年から来た未来人・國分玲「2024年に震度7の十勝沖地震が発生」「2024年に高市早苗が総理大臣」「2039年に中国が崩壊し華国が誕生」 ← これ - 大地震・前兆・予言.com | 災害や噂の情報サイト"
  },
  "https://kyukyoku-matome.com/paranormal/prophecy/2058-future-people-rei-kokubun/": {
+  "file": "68766e59f7bb25d7.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 403,
+  "title": "403 Forbidden"
  },
  "https://www.163.com/dy/article/FGBFCM9Q05370LSK.html": {
   "file": "eb8e37468a9ec956.jpg",
@@ -649,15 +665,18 @@
   "title": "【私が見た未来】はハズレ？予言一覧を完全解説！2025感想ネタバレ | わんらぼコミック"
  },
  "https://takenokorin.hateblo.jp/entry/2021/05/19/190554": {
+  "file": "837d1d14285ebd7c.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
+  "status": "ok",
   "http": 403,
   "title": "はてなブログ"
  },
  "https://www.nazotoki.com/matsubara.html": {
+  "file": "9de916610f00f297.jpg",
   "at": "2026-09-20",
-  "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "status": "ok",
+  "http": 200,
+  "title": "【増補改訂あり】新型コロナウイルスの大流行を予言した？ 松原照子氏の各種予言を検証する"
  },
  "https://tocana.jp/2019/11/post_125410_entry.html": {
   "file": "880239e8b22c03fd.jpg",
@@ -676,7 +695,7 @@
  "https://www20.opovo.com.br/app/maisnoticias/brasil/2014/03/20/noticiasbrasil,3223544/confira-a-lista-com-as-principais-premonicoes-de-jucelino-nobrega-da-l.shtml": {
   "at": "2026-09-20",
   "status": "error",
-  "error": "page.goto: Timeout 30000ms exceeded."
+  "error": "page.goto: Timeout 45000ms exceeded."
  },
  "https://www.hk01.com/%E5%8D%B3%E6%99%82%E5%A8%9B%E6%A8%82/332054/": {
   "file": "af5876c5f4c8ab9a.jpg",
@@ -706,10 +725,11 @@
   "title": "‘หมอปลาย’ ยมทูตชี้ผู้นำเงา หนีก่อนหนีไม่ทัน เตือนสงครามเพื่อนบ้านหนักปลายปี 68"
  },
  "https://www.youtube.com/watch?v=f6P9xydBWgY": {
+  "file": "087176f16ee612d6.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
-  "http": 429,
-  "title": "https://www.youtube.com/watch?v=f6P9xydBWgY"
+  "status": "ok",
+  "http": 200,
+  "title": "หมอปลาย พรายกระซิบ ทำนายปี2568 เกิดภัยพิบัติทั่วโลก | แฉ 2 พ.ค. 68 [2/3] | GMM25 - YouTube"
  },
  "https://www.sanook.com/news/8456746/": {
   "file": "a1385f62f3b5e9f9.jpg",
@@ -930,8 +950,9 @@
   "title": "'Third World War Will Start Today': Astrologer Kushal Kumar Makes Prediction; Know All About Him | Republic World"
  },
  "https://www.ptcnews.tv/world-news/who-is-astrologer-kushal-kumar-predicting-world-war-3-will-begin-today-4395293": {
+  "file": "b145db18ffe9f7ad.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
+  "status": "ok",
   "http": 403,
   "title": "403 Forbidden"
  },
@@ -963,10 +984,11 @@
   "title": "Psychic Predicts A Trump Victory In November's US Presidential Election | Higgypop"
  },
  "https://www.youtube.com/watch?v=INk--qIvbMY": {
+  "file": "3e24724d1e4d1356.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
-  "http": 429,
-  "title": "https://www.youtube.com/watch?v=INk--qIvbMY"
+  "status": "ok",
+  "http": 200,
+  "title": "Trump Assassination Attempt predicted 2 days prior by Joni Patry & Craig Hamilton Parker - YouTube"
  },
  "https://www.theindianpanorama.news/featured/looking-ahead-2024-2024-predictions-by-new-nostradamus-pm-modis-re-election-putins-death-cyber-attacks-more/": {
   "file": "a803784702abb03b.jpg",
@@ -983,10 +1005,11 @@
   "title": "Predictions of the \"new Nostradamus\", from the Pope and Putin dying, to the return of Trump to the American presidency"
  },
  "https://www.youtube.com/watch?v=56drON2tJo8": {
+  "file": "81a1bcc287d7b5c7.jpg",
   "at": "2026-09-20",
-  "status": "blocked",
-  "http": 429,
-  "title": "https://www.youtube.com/watch?v=56drON2tJo8"
+  "status": "ok",
+  "http": 200,
+  "title": "2025 World Psychic Predictions | Craig Hamilton-Parker 2️⃣0️⃣2️⃣5️⃣ - YouTube"
  },
  "https://www.higgypop.com/news/psychic-predicts-full-government-disclosure-on-ufos/": {
   "file": "bd08b5cbb4895490.jpg",
@@ -1008,5 +1031,11 @@
   "status": "ok",
   "http": 200,
   "title": "'Prophet of Doom' who predicted Queen's death and Covid shares very worrying 2026 predictions"
+ },
+ "https://zh.wikipedia.org/zh-hans/511%E5%9C%B0%E9%9C%87%E9%A0%90%E8%A8%80": {
+  "at": "2026-09-20",
+  "status": "blocked",
+  "http": 404,
+  "title": "511地震預言 - 维基百科，自由的百科全书"
  }
 }
