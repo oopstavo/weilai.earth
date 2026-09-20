@@ -1,9 +1,9 @@
 // 抓取所有出处链接的页面截图，写入 data/shots/<hash>.jpg 与 data/shots/index.json。
 // 用法：node scripts/shots.mjs [--force] [--only <substring>]
-// 幂等：已抓过且未加 --force 的 URL 会跳过；失败的 URL 记入 index.json 的 status 字段，下次重试。
+// 幂等：已抓过且未加 --force 的 URL 会跳过；失败（error）与被拦（blocked：4xx/5xx、Cloudflare 挑战页）的 URL 记入 index.json，下次重试。
 import { chromium } from 'playwright';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync, unlinkSync } from 'node:fs';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 const OUT = ROOT + 'data/shots/';
@@ -33,12 +33,26 @@ for (const url of urls) {
   if (!force && manifest[url]?.status === 'ok') { skip++; continue; }
   const page = await ctx.newPage();
   try {
-    const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+    await page.waitForTimeout(1200); // 同一批次限速，减少 429
+    let resp = await page.goto(url, { waitUntil: 'commit', timeout: 45000 });
+    await page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
     await page.waitForLoadState('networkidle', { timeout: 12000 }).catch(() => {});
     await page.waitForTimeout(800);
-    await page.screenshot({ path: OUT + h + '.jpg', type: 'jpeg', quality: 58 });
-    manifest[url] = { file: h + '.jpg', at: today, status: 'ok', http: resp ? resp.status() : null, title: (await page.title()).slice(0, 120) };
-    ok++; console.log('ok  ', resp ? resp.status() : '-', url);
+    // Cloudflare / 反爬挑战页：多等几秒再看一次
+    const challenge = t => /请稍候|Just a moment|Attention Required|Checking your browser|Verifying you are human/i.test(t);
+    if (challenge(await page.title())) { await page.waitForTimeout(8000); }
+    const title = (await page.title()).slice(0, 120);
+    const http = resp ? resp.status() : null;
+    const blocked = (http && http >= 400 && !(http === 403 && !challenge(title) && title)) || challenge(title) || /^\s*$/.test(title) && http !== 200;
+    if (blocked) {
+      if (existsSync(OUT + h + '.jpg')) unlinkSync(OUT + h + '.jpg');
+      manifest[url] = { at: today, status: 'blocked', http, title };
+      fail++; console.log('BLK ', http, url, '—', title);
+    } else {
+      await page.screenshot({ path: OUT + h + '.jpg', type: 'jpeg', quality: 58 });
+      manifest[url] = { file: h + '.jpg', at: today, status: 'ok', http, title };
+      ok++; console.log('ok  ', http, url);
+    }
   } catch (err) {
     manifest[url] = { ...(manifest[url] || {}), at: today, status: 'error', error: String(err.message).split('\n')[0].slice(0, 160) };
     fail++; console.log('FAIL', url, '—', manifest[url].error);
